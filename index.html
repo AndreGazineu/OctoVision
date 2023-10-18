@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octo A/B Vision</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script type="module" src="https://gradio.s3-us-west-2.amazonaws.com/3.27.0/gradio.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0e4d7, #f4ebf5);
+        }
+
+        .wrap.center.svelte-gjihhp.hide,
+        .svelte-1ed2p3z {
+            display: none;
+        }
+
+        .svelte-1frtwj3 + :contains("Octo") {
+            display: none;
+        }
+
+        .svelte-1frtwj3 {
+            display: none;
+        }
+
+        svg[viewBox="0 0 32 32"] {
+            display: none;
+        }
+
+        .svelte-1frtwj3,
+        .svelte-1frtwj3 + :contains("MiniGPT-4") {
+            display: none;
+        }
+        .svelte-1frtwj3 {
+            display: none !important;
+        }
+
+        #component-11,
+        #component-10 {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container py-5">
+        <h1 class="text-center mb-5">Octo A/B Vision</h1>
+
+        <div class="alert alert-primary" role="alert">
+            <h4 class="alert-heading">📝 Instructions</h4>
+            <ul>
+                <li>📤 Release an image or click the box for Upload.</li>
+                <li>🚀 Click on "Upload & Start Chat".</li>
+                <li>💬 Type your questions about the image in the "User" box.</li>
+                <li>⏎ Press "Enter".</li>
+                <li>🔄 If you want to restart, click on "Restart".</li>
+            </ul>
+        </div>
+
+        <img src="https://uploaddeimagens.com.br/images/004/640/106/original/octoab.jpeg?1697643641" class="img-fluid mb-5" alt="Octo A/B Image">
+
+        <footer class="text-center">
+            <p>&copy; 2023 Octo A/B Test</p>
+        </footer>
+    </div>
+
+    <gradio-app src="https://vision-cair-minigpt4.hf.space"></gradio-app>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const chatBox = document.getElementById('chat-box');
+
+            const userMessage = document.createElement('p');
+            userMessage.textContent = input.value;
+            chatBox.appendChild(userMessage);
+
+            const octoMessage = document.createElement('p');
+            octoMessage.className = 'octo-chat-message';
+            octoMessage.textContent = 'OctoChat 🐙: Processando...';
+            chatBox.appendChild(octoMessage);
+
+            const response = await queryHuggingFaceModel(input.value);
+            octoMessage.textContent = 'OctoChat 🐙: ' + response;
+
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function queryHuggingFaceModel(message) {
+            const TOKEN = "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";
+            const MODEL_URL = "https://api-inference.huggingface.co/models/Vision-CAIR/minigpt4"; 
+
+            const headers = new Headers({
+                "Authorization": "Bearer " + TOKEN,
+                "Content-Type": "application/json"
+            });
+
+            const response = await fetch(MODEL_URL, {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({ inputs: message })
+            });
+
+            const data = await response.json();
+            return data.generated_text || "Sorry, I couldn't process that.";
+        }
+
+        document.getElementById('chat-input').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
